@@ -24,7 +24,7 @@
 /*
 * ROS includes
 */
-#include <urdf/model.h>
+#include <urdf/model.hpp>
 #include <kdl_parser/kdl_parser.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 

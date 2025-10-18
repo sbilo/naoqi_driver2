@@ -23,7 +23,7 @@
 /*
 * ROS includes
 */
-#include <tf2/LinearMath/Transform.h>
+#include <tf2/LinearMath/Transform.hpp>
 #include <geometry_msgs/msg/transform.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 

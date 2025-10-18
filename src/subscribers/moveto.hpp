@@ -28,8 +28,8 @@
  */
 #include "rclcpp/rclcpp.hpp"
 #include <geometry_msgs/msg/pose_stamped.hpp>
-#include <tf2_ros/buffer.h>
-#include <tf2/time.h>
+#include <tf2_ros/buffer.hpp>
+#include <tf2/time.hpp>
 
 namespace naoqi
 {

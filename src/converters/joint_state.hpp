@@ -29,9 +29,9 @@
 /*
 * ROS includes
 */
-#include <urdf/model.h>
+#include <urdf/model.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <tf2_ros/buffer.h>
+#include <tf2_ros/buffer.hpp>
 #include <robot_state_publisher/robot_state_publisher.hpp>
 
 namespace naoqi

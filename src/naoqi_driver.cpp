@@ -23,8 +23,7 @@
 /*
  * ROS
  */
-#include <tf2_ros/buffer.h>
-
+#include <tf2_ros/buffer.hpp>
 /*
  * PUBLIC INTERFACE
  */

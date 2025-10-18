@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(naoqi_driver)
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(cv_bridge REQUIRED)
@@ -140,7 +141,7 @@ ament_target_dependencies(naoqi_driver
   tf2_ros
   OpenCV
   Boost
-
+  ament_index_cpp
 )
 
 install(TARGETS naoqi_driver DESTINATION lib/)
