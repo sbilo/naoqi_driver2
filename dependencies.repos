@@ -11,7 +11,7 @@ repositories:
   naoqi_bridge_msgs:
     type: git
     url: https://github.com/sbilo/naoqi_bridge_msgs2.git
-    version: main
+    version: rolling-fixes
   nao_meshes:
     type: git
     url: https://github.com/ros-naoqi/nao_meshes2.git
