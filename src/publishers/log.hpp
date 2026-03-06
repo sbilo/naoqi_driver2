@@ -40,9 +40,6 @@
 * ALDEBARAN includes
 */
 #include <qi/anyobject.hpp>
-#include <qicore/logmessage.hpp>
-#include <qicore/logmanager.hpp>
-#include <qicore/loglistener.hpp>
 
 namespace naoqi
 {

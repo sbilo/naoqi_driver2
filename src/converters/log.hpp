@@ -25,8 +25,7 @@
 #include <naoqi_driver/message_actions.h>
 #include "converter_base.hpp"
 
-#include <qicore/logmanager.hpp>
-#include <qicore/loglistener.hpp>
+#include <qi/anyobject.hpp>
 
 namespace naoqi
 {
@@ -51,10 +50,10 @@ private:
   /** Function that sets the NAOqi log level to the ROS one */
   void set_qi_logger_level();
 
-  qi::LogManagerPtr logger_;
+  qi::AnyObject logger_;
   /** Log level that is currently translated to ROS */
   qi::LogLevel log_level_;
-  qi::LogListenerPtr listener_;
+  qi::AnyObject listener_;
 
   std::map<message_actions::MessageAction, Callback_t> callbacks_;
 };

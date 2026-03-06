@@ -13,8 +13,9 @@ find_package(geometry_msgs REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(naoqi_bridge_msgs REQUIRED)
-find_package(naoqi_libqi REQUIRED)
-find_package(naoqi_libqicore REQUIRED)
+find_package(qi REQUIRED
+  HINTS "${CMAKE_CURRENT_SOURCE_DIR}/../libqi/build"
+)
 find_package(robot_state_publisher REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
@@ -96,14 +97,13 @@ set(
   src/event/touch.cpp
 )
 
-add_definitions(-DLIBQI_VERSION=${naoqi_libqi_VERSION_MAJOR}${naoqi_libqi_VERSION_MINOR})
+add_definitions(-DLIBQI_VERSION=${qi_VERSION_MAJOR}${qi_VERSION_MINOR})
 
 # Add pre-processor compile flag indicating ament
 add_definitions( -DAMENT_BUILD )
 
 include_directories(
   "include"
-  ${naoqi_libqi_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
 
@@ -131,8 +131,6 @@ ament_target_dependencies(naoqi_driver
   ament_index_cpp
   kdl_parser
   naoqi_bridge_msgs
-  naoqi_libqi
-  naoqi_libqicore
   robot_state_publisher
   sensor_msgs
   std_msgs
@@ -141,8 +139,8 @@ ament_target_dependencies(naoqi_driver
   tf2_ros
   OpenCV
   Boost
-  ament_index_cpp
 )
+target_link_libraries(naoqi_driver qi::qi)
 
 install(TARGETS naoqi_driver DESTINATION lib/)
 
@@ -151,7 +149,7 @@ add_executable(naoqi_driver_node src/external_registration.cpp)
 target_link_libraries(naoqi_driver_node
     naoqi_driver
     ${rclcpp_LIBRARIES}
-    ${naoqi_libqi_LIBRARIES}
+    qi::qi
     ${Boost_LIBRARIES}
 )
 

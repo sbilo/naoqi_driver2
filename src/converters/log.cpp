@@ -17,7 +17,7 @@
 
 #include "log.hpp"
 
-#include <qicore/logmessage.hpp>
+#include "../qi_log_message.hpp"
 #include <queue>
 
 #include <std_msgs/msg/string.hpp>
@@ -100,7 +100,10 @@ void logCallback(const qi::LogMessage& msg)
   log.level = LogLevel::get_from_qi(msg.level).ros_msg_;
   log.name = msg.category;
   log.msg = msg.message;
-  log.stamp = rclcpp::Time(msg.timestamp.tv_sec, msg.timestamp.tv_usec);
+  auto ns = boost::chrono::duration_cast<boost::chrono::nanoseconds>(
+      msg.systemDate.time_since_epoch()).count();
+  log.stamp = rclcpp::Time(static_cast<int32_t>(ns / 1000000000LL),
+                           static_cast<uint32_t>(ns % 1000000000LL));
 
   // If we are not publishing, the queue will increase, so we have to prevent an explosion
   // We only keep a log if it's within 5 second of the last publish (totally arbitrary)
@@ -127,16 +130,9 @@ LogConverter::LogConverter( const std::string& name, float frequency, const qi::
   LogLevel(qi::LogLevel_Verbose, rcl_interfaces::msg::Log::DEBUG, RCUTILS_LOG_SEVERITY_DEBUG);
   LogLevel(qi::LogLevel_Debug, rcl_interfaces::msg::Log::DEBUG, RCUTILS_LOG_SEVERITY_DEBUG);
 
-  // TEMPORARY CODE, WEIRD BUG
-  qi::AnyObject p_manager = session->service("LogManager").value();
-  auto test_obj = p_manager.call<qi::AnyObject>("getListener");
-  qi::LogListenerPtr test = static_cast<qi::LogListenerPtr>(test_obj);
-  test->onLogMessage.connect(logCallback);
-  // END
-
-  // listener_ = logger_->getListener();
+  listener_ = logger_.call<qi::AnyObject>("getListener");
+  listener_.connect("onLogMessage", logCallback);
   set_qi_logger_level();
-  // listener_->onLogMessage.connect(logCallback);
 }
 
 void LogConverter::registerCallback( const message_actions::MessageAction action, Callback_t cb )

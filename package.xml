@@ -22,8 +22,6 @@
   <depend>image_transport</depend>
   <depend>kdl_parser</depend>
   <depend version_gte="2.0.0">naoqi_bridge_msgs</depend>
-  <depend>naoqi_libqi</depend>
-  <depend>naoqi_libqicore</depend>
   <depend>robot_state_publisher</depend>
   <depend>tf2_ros</depend>
   <depend>boost</depend>
