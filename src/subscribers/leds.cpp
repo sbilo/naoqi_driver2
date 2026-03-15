@@ -5,9 +5,10 @@ namespace naoqi
 namespace subscriber
 {
 
-LedsSubscriber::LedsSubscriber( const std::string& name, const std::string& topic, const qi::SessionPtr& session ):
+LedsSubscriber::LedsSubscriber( const std::string& name, const std::string& topic, const std::string& led_group, const qi::SessionPtr& session ):
   BaseSubscriber( name, topic, session ),
-  p_leds_(session->service("ALLeds").value())
+  p_leds_(session->service("ALLeds").value()),
+  led_group_(led_group)
 {}
 
 void LedsSubscriber::reset( rclcpp::Node* node )
@@ -22,12 +23,11 @@ void LedsSubscriber::reset( rclcpp::Node* node )
 
 void LedsSubscriber::callback( const std_msgs::msg::ColorRGBA::SharedPtr msg )
 {
-  // Pack r/g/b (0.0-1.0) into a single 0x00RRGGBB int as ALLeds.fadeRGB expects
   const int color =
     (static_cast<int>(msg->r * 255) << 16) |
     (static_cast<int>(msg->g * 255) <<  8) |
     (static_cast<int>(msg->b * 255));
-  p_leds_.async<void>("fadeRGB", "FaceLeds", color, 0.1f);
+  p_leds_.async<void>("fadeRGB", led_group_, color, 0.1f);
 }
 
 } // subscriber

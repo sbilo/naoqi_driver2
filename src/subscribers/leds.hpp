@@ -13,7 +13,7 @@ namespace subscriber
 class LedsSubscriber: public BaseSubscriber<LedsSubscriber>
 {
 public:
-  LedsSubscriber( const std::string& name, const std::string& topic, const qi::SessionPtr& session );
+  LedsSubscriber( const std::string& name, const std::string& topic, const std::string& led_group, const qi::SessionPtr& session );
   ~LedsSubscriber(){}
 
   void reset( rclcpp::Node* node );
@@ -21,6 +21,7 @@ public:
 
 private:
   qi::AnyObject p_leds_;
+  std::string led_group_;
   rclcpp::Subscription<std_msgs::msg::ColorRGBA>::SharedPtr sub_;
 };
 

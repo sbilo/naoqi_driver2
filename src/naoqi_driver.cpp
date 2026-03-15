@@ -997,7 +997,8 @@ void Driver::registerDefaultSubscriber()
   registerSubscriber( boost::make_shared<naoqi::subscriber::TeleopSubscriber>("teleop", "/cmd_vel", "/joint_angles", sessionPtr_) );
   registerSubscriber( boost::make_shared<naoqi::subscriber::MovetoSubscriber>("moveto", "/move_base_simple/goal", sessionPtr_, tf2_buffer_) );
   registerSubscriber( boost::make_shared<naoqi::subscriber::SpeechSubscriber>("speech", "/speech", sessionPtr_) );
-  registerSubscriber( boost::make_shared<naoqi::subscriber::LedsSubscriber>("leds", "/led_eyes", sessionPtr_) );
+  registerSubscriber( boost::make_shared<naoqi::subscriber::LedsSubscriber>("leds_eyes", "/led_eyes", "FaceLeds", sessionPtr_) );
+  registerSubscriber( boost::make_shared<naoqi::subscriber::LedsSubscriber>("leds_ears", "/led_ears", "EarLeds", sessionPtr_) );
   registerSubscriber( boost::make_shared<naoqi::subscriber::AutonomousLifeSubscriber>("autonomous_life", "/autonomous_life/enable", sessionPtr_) );
 }
 
