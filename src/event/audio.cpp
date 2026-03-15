@@ -218,8 +218,8 @@ void AudioEventRegister::processRemote(int nbOfChannels, int samplesByChannel, q
   msg.frequency = 16000;
   // Use only as many channel_map entries as channels actually delivered,
   // so the receiver can correctly compute chunk duration from data size.
-  msg.channel_map = std::vector<int>(channelMap.begin(),
-                                     channelMap.begin() + nbOfChannels);
+  msg.channel_map = std::vector<uint8_t>(channelMap.begin(),
+                                         channelMap.begin() + nbOfChannels);
 
   std::pair<char*, size_t> buffer_pointer = buffer.asRaw();
   int16_t* remoteBuffer = (int16_t*)buffer_pointer.first;
