@@ -21,6 +21,7 @@ public:
 
 private:
   qi::AnyObject p_posture_;
+  qi::AnyObject p_motion_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_;
 };
 

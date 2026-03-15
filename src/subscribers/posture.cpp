@@ -7,7 +7,8 @@ namespace subscriber
 
 PostureSubscriber::PostureSubscriber( const std::string& name, const std::string& topic, const qi::SessionPtr& session ):
   BaseSubscriber( name, topic, session ),
-  p_posture_(session->service("ALRobotPosture").value())
+  p_posture_(session->service("ALRobotPosture").value()),
+  p_motion_(session->service("ALMotion").value())
 {}
 
 void PostureSubscriber::reset( rclcpp::Node* node )
@@ -22,7 +23,12 @@ void PostureSubscriber::reset( rclcpp::Node* node )
 
 void PostureSubscriber::callback( const std_msgs::msg::String::SharedPtr msg )
 {
-  p_posture_.async<bool>("goToPosture", msg->data, 0.5f);
+  if (msg->data == "Crouch" || msg->data == "rest") {
+    // ALMotion.rest() is more reliable than goToPosture in solitary life mode
+    p_motion_.async<void>("rest");
+  } else {
+    p_posture_.async<bool>("goToPosture", msg->data, 0.5f);
+  }
 }
 
 } // subscriber
