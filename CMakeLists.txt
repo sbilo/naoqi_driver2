@@ -61,6 +61,8 @@ set(
   src/subscribers/teleop.cpp
   src/subscribers/moveto.cpp
   src/subscribers/speech.cpp
+  src/subscribers/leds.cpp
+  src/subscribers/autonomous_life.cpp
   )
 
 set(
