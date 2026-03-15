@@ -147,7 +147,7 @@ void AudioEventRegister::publishLoop()
     naoqi_bridge_msgs::msg::AudioBuffer msg;
     {
       boost::mutex::scoped_lock lock(queue_mutex_);
-      queue_cv_.wait(queue_mutex_, [this]{ return !publish_queue_.empty() || !publish_thread_running_; });
+      queue_cv_.wait(lock, [this]{ return !publish_queue_.empty() || !publish_thread_running_; });
       if (!publish_thread_running_ && publish_queue_.empty())
         return;
       msg = std::move(publish_queue_.front());

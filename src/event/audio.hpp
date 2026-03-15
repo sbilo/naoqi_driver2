@@ -21,6 +21,7 @@
 #include <queue>
 #include <string>
 #include <thread>
+#include <boost/thread/condition.hpp>
 
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -97,7 +98,7 @@ private:
   // Publish queue -- processRemote enqueues, publishLoop dequeues
   std::queue<naoqi_bridge_msgs::msg::AudioBuffer> publish_queue_;
   boost::mutex queue_mutex_;
-  std::condition_variable_any queue_cv_;
+  boost::condition_variable_any queue_cv_;
   std::thread publish_thread_;
   bool publish_thread_running_;
 

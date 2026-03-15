@@ -22,7 +22,7 @@ void AutonomousLifeSubscriber::reset( rclcpp::Node* node )
 
 void AutonomousLifeSubscriber::callback( const std_msgs::msg::Bool::SharedPtr msg )
 {
-  const std::string state = msg->data ? "solitary" : "disabled";
+  const std::string state = msg->data ? "solitary" : "solitary"; // "solitary" keeps audio alive; "disabled" can break mic pipeline
   p_life_.async<void>("setState", state);
 }
 
