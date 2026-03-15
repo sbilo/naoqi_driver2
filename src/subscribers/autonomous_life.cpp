@@ -7,7 +7,8 @@ namespace subscriber
 
 AutonomousLifeSubscriber::AutonomousLifeSubscriber( const std::string& name, const std::string& topic, const qi::SessionPtr& session ):
   BaseSubscriber( name, topic, session ),
-  p_life_(session->service("ALAutonomousLife").value())
+  p_life_(session->service("ALAutonomousLife").value()),
+  p_background_movement_(session->service("ALBackgroundMovement").value())
 {}
 
 void AutonomousLifeSubscriber::reset( rclcpp::Node* node )
@@ -22,9 +23,10 @@ void AutonomousLifeSubscriber::reset( rclcpp::Node* node )
 
 void AutonomousLifeSubscriber::callback( const std_msgs::msg::Bool::SharedPtr msg )
 {
-  // "safeguard" rests the robot without autonomous animations; "disabled" breaks the mic pipeline
-  const std::string state = msg->data ? "solitary" : "safeguard";
-  p_life_.async<void>("setState", state);
+  // Always stay in "solitary" — "safeguard" and "disabled" both break the mic pipeline.
+  // Suppress background wiggling by disabling ALBackgroundMovement instead.
+  p_life_.async<void>("setState", "solitary");
+  p_background_movement_.async<void>("setEnabled", false);
 }
 
 } // subscriber

@@ -21,6 +21,7 @@ public:
 
 private:
   qi::AnyObject p_life_;
+  qi::AnyObject p_background_movement_;
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr sub_;
 };
 
