@@ -103,8 +103,8 @@ void AudioEventRegister::startProcess()
       p_audio_.call<void>(
               "setClientPreferences",
               AUDIO_EXTRACTOR_NAME,
-              48000,
-              0,
+              16000,  // 16kHz is sufficient for speech recognition
+              3,      // front microphone only (1 channel, reduces data 4x)
               0
               );
       p_audio_.call<void>("subscribe", AUDIO_EXTRACTOR_NAME);
@@ -172,7 +172,7 @@ void AudioEventRegister::processRemote(int nbOfChannels, int samplesByChannel, q
 {
   naoqi_bridge_msgs::msg::AudioBuffer msg = naoqi_bridge_msgs::msg::AudioBuffer();
   msg.header.stamp = helpers::Time::now();
-  msg.frequency = 48000;
+  msg.frequency = 16000;
   msg.channel_map = channelMap;
 
   std::pair<char*, size_t> buffer_pointer = buffer.asRaw();
