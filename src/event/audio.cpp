@@ -115,7 +115,7 @@ void AudioEventRegister::startProcess()
               "setClientPreferences",
               AUDIO_EXTRACTOR_NAME,
               16000,  // 16kHz is sufficient for speech recognition
-              3,      // front microphone only (1 channel, reduces data 4x)
+              0,      // all channels (keeps channelMap consistent)
               0
               );
       p_audio_.call<void>("subscribe", AUDIO_EXTRACTOR_NAME);
