@@ -22,7 +22,8 @@ void AutonomousLifeSubscriber::reset( rclcpp::Node* node )
 
 void AutonomousLifeSubscriber::callback( const std_msgs::msg::Bool::SharedPtr msg )
 {
-  const std::string state = msg->data ? "solitary" : "solitary"; // "solitary" keeps audio alive; "disabled" can break mic pipeline
+  // "safeguard" rests the robot without autonomous animations; "disabled" breaks the mic pipeline
+  const std::string state = msg->data ? "solitary" : "safeguard";
   p_life_.async<void>("setState", state);
 }
 
