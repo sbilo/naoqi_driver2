@@ -18,7 +18,9 @@
 #ifndef AUDIO_EVENT_REGISTER_HPP
 #define AUDIO_EVENT_REGISTER_HPP
 
+#include <queue>
 #include <string>
+#include <thread>
 
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -44,21 +46,11 @@
 namespace naoqi
 {
 
-/**
-* @brief GlobalRecorder concept interface
-* @note this defines an private concept struct,
-* which each instance has to implement
-* @note a type erasure pattern in implemented here to avoid strict inheritance,
-* thus each possible publisher instance has to implement the virtual functions mentioned in the concept
-*/
 class AudioEventRegister: public boost::enable_shared_from_this<AudioEventRegister>
 {
 
 public:
 
-  /**
-  * @brief Constructor for recorder interface
-  */
   AudioEventRegister( const std::string& name, const float& frequency, const qi::SessionPtr& session );
   ~AudioEventRegister();
 
@@ -75,12 +67,14 @@ public:
   void isPublishing(bool state);
   void isDumping(bool state);
 
+  // Called synchronously by NAO's qi transport -- must return quickly
   void processRemote(int nbOfChannels, int samplesByChannel, qi::AnyValue altimestamp, qi::AnyValue buffer);
 
 private:
   void registerCallback();
   void unregisterCallback();
   void onEvent();
+  void publishLoop();
 
 private:
   qi::SessionPtr session_;
@@ -99,6 +93,13 @@ private:
   bool isPublishing_;
   bool isRecording_;
   bool isDumping_;
+
+  // Publish queue -- processRemote enqueues, publishLoop dequeues
+  std::queue<naoqi_bridge_msgs::msg::AudioBuffer> publish_queue_;
+  boost::mutex queue_mutex_;
+  std::condition_variable_any queue_cv_;
+  std::thread publish_thread_;
+  bool publish_thread_running_;
 
 }; // class
 

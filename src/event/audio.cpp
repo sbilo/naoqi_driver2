@@ -41,9 +41,9 @@ AudioEventRegister::AudioEventRegister( const std::string& name, const float& fr
     isStarted_(false),
     isPublishing_(false),
     isRecording_(false),
-    isDumping_(false)
+    isDumping_(false),
+    publish_thread_running_(false)
 {
-  // _getMicrophoneConfig is used for NAOqi < 2.9, _getConfigMap for NAOqi > 2.9
   int micConfig;
   auto robotModel = session->service("ALRobotModel").value();
   const auto &naoqiVersion = helpers::driver::getNaoqiVersion(session);
@@ -77,6 +77,13 @@ AudioEventRegister::AudioEventRegister( const std::string& name, const float& fr
 AudioEventRegister::~AudioEventRegister()
 {
   stopProcess();
+  {
+    boost::mutex::scoped_lock lock(queue_mutex_);
+    publish_thread_running_ = false;
+    queue_cv_.notify_all();
+  }
+  if (publish_thread_.joinable())
+    publish_thread_.join();
   converter_.unregisterCallback(message_actions::PUBLISH);
   converter_.unregisterCallback(message_actions::RECORD);
   converter_.unregisterCallback(message_actions::LOG);
@@ -99,6 +106,10 @@ void AudioEventRegister::startProcess()
   {
     if(!serviceId)
     {
+      // Start background publish thread
+      publish_thread_running_ = true;
+      publish_thread_ = std::thread(&AudioEventRegister::publishLoop, this);
+
       serviceId = session_->registerService(AUDIO_EXTRACTOR_NAME, shared_from_this()).value();
       p_audio_.call<void>(
               "setClientPreferences",
@@ -126,6 +137,36 @@ void AudioEventRegister::stopProcess()
     }
     std::cout << "Audio Extractor: Stop" << std::endl;
     isStarted_ = false;
+  }
+}
+
+void AudioEventRegister::publishLoop()
+{
+  while (true)
+  {
+    naoqi_bridge_msgs::msg::AudioBuffer msg;
+    {
+      boost::mutex::scoped_lock lock(queue_mutex_);
+      queue_cv_.wait(queue_mutex_, [this]{ return !publish_queue_.empty() || !publish_thread_running_; });
+      if (!publish_thread_running_ && publish_queue_.empty())
+        return;
+      msg = std::move(publish_queue_.front());
+      publish_queue_.pop();
+    }
+
+    std::vector<message_actions::MessageAction> actions;
+    {
+      boost::mutex::scoped_lock callback_lock(processing_mutex_);
+      if (!isStarted_) continue;
+      if ( isPublishing_ && publisher_.isSubscribed() )
+        actions.push_back(message_actions::PUBLISH);
+      if ( isRecording_ )
+        actions.push_back(message_actions::RECORD);
+      if ( !isDumping_ )
+        actions.push_back(message_actions::LOG);
+    }
+    if (!actions.empty())
+      converter_.callAll(actions, msg);
   }
 }
 
@@ -170,40 +211,25 @@ void AudioEventRegister::unregisterCallback()
 
 void AudioEventRegister::processRemote(int nbOfChannels, int samplesByChannel, qi::AnyValue altimestamp, qi::AnyValue buffer)
 {
-  naoqi_bridge_msgs::msg::AudioBuffer msg = naoqi_bridge_msgs::msg::AudioBuffer();
+  // Copy the buffer data immediately (pointer is only valid during this call)
+  // then enqueue and return -- keeps the qi transport thread unblocked
+  naoqi_bridge_msgs::msg::AudioBuffer msg;
   msg.header.stamp = helpers::Time::now();
   msg.frequency = 16000;
   msg.channel_map = channelMap;
 
   std::pair<char*, size_t> buffer_pointer = buffer.asRaw();
-
   int16_t* remoteBuffer = (int16_t*)buffer_pointer.first;
   int bufferSize = nbOfChannels * samplesByChannel;
-  msg.data = std::vector<int16_t>(remoteBuffer, remoteBuffer+bufferSize);
+  msg.data = std::vector<int16_t>(remoteBuffer, remoteBuffer + bufferSize);
 
-  std::vector<message_actions::MessageAction> actions;
-  boost::mutex::scoped_lock callback_lock(processing_mutex_);
-  if (isStarted_) {
-    // CHECK FOR PUBLISH
-    if ( isPublishing_ && publisher_.isSubscribed() )
-    {
-      actions.push_back(message_actions::PUBLISH);
-    }
-    // CHECK FOR RECORD
-    if ( isRecording_ )
-    {
-      actions.push_back(message_actions::RECORD);
-    }
-    if ( !isDumping_ )
-    {
-      actions.push_back(message_actions::LOG);
-    }
-    if (actions.size() >0)
-    {
-      converter_.callAll( actions, msg );
-    }
+  {
+    boost::mutex::scoped_lock lock(queue_mutex_);
+    // Drop if queue is getting backed up (keeps latency low)
+    if (publish_queue_.size() < 4)
+      publish_queue_.push(std::move(msg));
   }
-
+  queue_cv_.notify_one();
 }
 
 }//namespace
