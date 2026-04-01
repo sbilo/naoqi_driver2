@@ -75,6 +75,7 @@
 #include "subscribers/speech.hpp"
 #include "subscribers/leds.hpp"
 #include "subscribers/posture.hpp"
+#include "subscribers/autonomous_life.hpp"
 
 
 /*
@@ -1000,6 +1001,7 @@ void Driver::registerDefaultSubscriber()
   registerSubscriber( boost::make_shared<naoqi::subscriber::LedsSubscriber>("leds_eyes", "/led_eyes", "FaceLeds", sessionPtr_) );
   registerSubscriber( boost::make_shared<naoqi::subscriber::LedsSubscriber>("leds_ears", "/led_ears", "EarLeds", sessionPtr_) );
   registerSubscriber( boost::make_shared<naoqi::subscriber::PostureSubscriber>("posture", "/posture", sessionPtr_) );
+  registerSubscriber( boost::make_shared<naoqi::subscriber::AutonomousLifeSubscriber>("autonomous_life", "/autonomous_life/enable", sessionPtr_) );
 }
 
 void Driver::registerService( service::Service srv )
