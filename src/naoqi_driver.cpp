@@ -74,6 +74,7 @@
 #include "subscribers/moveto.hpp"
 #include "subscribers/speech.hpp"
 #include "subscribers/leds.hpp"
+#include "subscribers/posture.hpp"
 
 
 /*
@@ -998,6 +999,7 @@ void Driver::registerDefaultSubscriber()
   registerSubscriber( boost::make_shared<naoqi::subscriber::SpeechSubscriber>("speech", "/speech", sessionPtr_) );
   registerSubscriber( boost::make_shared<naoqi::subscriber::LedsSubscriber>("leds_eyes", "/led_eyes", "FaceLeds", sessionPtr_) );
   registerSubscriber( boost::make_shared<naoqi::subscriber::LedsSubscriber>("leds_ears", "/led_ears", "EarLeds", sessionPtr_) );
+  registerSubscriber( boost::make_shared<naoqi::subscriber::PostureSubscriber>("posture", "/posture", sessionPtr_) );
 }
 
 void Driver::registerService( service::Service srv )

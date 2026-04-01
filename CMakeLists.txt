@@ -62,6 +62,7 @@ set(
   src/subscribers/moveto.cpp
   src/subscribers/speech.cpp
   src/subscribers/leds.cpp
+  src/subscribers/posture.cpp
   )
 
 set(
