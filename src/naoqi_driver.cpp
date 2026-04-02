@@ -75,7 +75,6 @@
 #include "subscribers/speech.hpp"
 #include "subscribers/leds.hpp"
 #include "subscribers/posture.hpp"
-#include "subscribers/autonomous_life.hpp"
 
 
 /*
@@ -1001,7 +1000,19 @@ void Driver::registerDefaultSubscriber()
   registerSubscriber( boost::make_shared<naoqi::subscriber::LedsSubscriber>("leds_eyes", "/led_eyes", "FaceLeds", sessionPtr_) );
   registerSubscriber( boost::make_shared<naoqi::subscriber::LedsSubscriber>("leds_ears", "/led_ears", "EarLeds", sessionPtr_) );
   registerSubscriber( boost::make_shared<naoqi::subscriber::PostureSubscriber>("posture", "/posture", sessionPtr_) );
-  registerSubscriber( boost::make_shared<naoqi::subscriber::AutonomousLifeSubscriber>("autonomous_life", "/autonomous_life/enable", sessionPtr_) );
+
+  // Set solitary life mode at startup so behaviors don't override LED/motion control.
+  // ALBackgroundMovement is not available on all NAO versions, so both calls are best-effort.
+  try {
+    auto p_life = sessionPtr_->service("ALAutonomousLife").value();
+    p_life.async<void>("setState", "solitary");
+  } catch (...) {
+    std::cout << "ALAutonomousLife not available, skipping solitary mode" << std::endl;
+  }
+  try {
+    auto p_bg = sessionPtr_->service("ALBackgroundMovement").value();
+    p_bg.async<void>("setEnabled", false);
+  } catch (...) {}
 }
 
 void Driver::registerService( service::Service srv )

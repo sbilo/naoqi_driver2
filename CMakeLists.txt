@@ -63,7 +63,6 @@ set(
   src/subscribers/speech.cpp
   src/subscribers/leds.cpp
   src/subscribers/posture.cpp
-  src/subscribers/autonomous_life.cpp
   )
 
 set(
