@@ -2,7 +2,22 @@ cmake_minimum_required(VERSION 3.5)
 project(naoqi_driver)
 
 find_package(ament_cmake REQUIRED)
-find_package(ament_cmake_target_dependencies REQUIRED)
+
+# ament_target_dependencies was removed from ament_cmake rolling (Jan 2026).
+# Define a compatible shim using the classic _INCLUDE_DIRS/_LIBRARIES variables
+# that every find_package still sets.
+if(NOT COMMAND ament_target_dependencies)
+  macro(ament_target_dependencies target)
+    foreach(_dep ${ARGN})
+      if(${_dep}_INCLUDE_DIRS)
+        target_include_directories(${target} PUBLIC ${${_dep}_INCLUDE_DIRS})
+      endif()
+      if(${_dep}_LIBRARIES)
+        target_link_libraries(${target} PUBLIC ${${_dep}_LIBRARIES})
+      endif()
+    endforeach()
+  endmacro()
+endif()
 find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
