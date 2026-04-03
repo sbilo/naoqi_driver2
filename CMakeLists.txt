@@ -9,12 +9,17 @@ find_package(ament_cmake REQUIRED)
 if(NOT COMMAND ament_target_dependencies)
   macro(ament_target_dependencies target)
     foreach(_dep ${ARGN})
-      # Try modern imported target (pkg::pkg) — carries includes + libs automatically
-      if(TARGET "${_dep}::${_dep}")
-        target_link_libraries(${target} PUBLIC "${_dep}::${_dep}")
-      endif()
-      # Also apply legacy variables — harmless if empty, catches packages that
-      # don't follow the pkg::pkg convention (OpenCV, Boost, naoqi_libqi, etc.)
+      # Try known imported target name patterns
+      foreach(_candidate
+          "${_dep}::${_dep}"          # standard:  rclcpp::rclcpp
+          "${_dep}::${_dep}_node"     # _node lib:  robot_state_publisher::robot_state_publisher_node
+          "${_dep}::${_dep}_core")    # _core lib:  future-proofing
+        if(TARGET "${_candidate}")
+          target_link_libraries(${target} PUBLIC "${_candidate}")
+          break()
+        endif()
+      endforeach()
+      # Also apply legacy variables — catches OpenCV, Boost, naoqi_libqi, etc.
       if(${_dep}_INCLUDE_DIRS)
         target_include_directories(${target} PUBLIC ${${_dep}_INCLUDE_DIRS})
       endif()
