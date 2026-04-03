@@ -75,6 +75,7 @@
 #include "subscribers/speech.hpp"
 #include "subscribers/leds.hpp"
 #include "subscribers/posture.hpp"
+#include "subscribers/shutdown.hpp"
 
 
 /*
@@ -1000,6 +1001,7 @@ void Driver::registerDefaultSubscriber()
   registerSubscriber( boost::make_shared<naoqi::subscriber::LedsSubscriber>("leds_eyes", "/led_eyes", "FaceLeds", sessionPtr_) );
   registerSubscriber( boost::make_shared<naoqi::subscriber::LedsSubscriber>("leds_ears", "/led_ears", "EarLeds", sessionPtr_) );
   registerSubscriber( boost::make_shared<naoqi::subscriber::PostureSubscriber>("posture", "/posture", sessionPtr_) );
+  registerSubscriber( boost::make_shared<naoqi::subscriber::ShutdownSubscriber>("shutdown", "/shutdown", sessionPtr_) );
 
   // Set solitary life mode at startup so behaviors don't override LED/motion control.
   // ALBackgroundMovement is not available on all NAO versions, so both calls are best-effort.
