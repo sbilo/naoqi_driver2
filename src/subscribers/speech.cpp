@@ -19,6 +19,7 @@
  * LOCAL includes
  */
 #include "speech.hpp"
+#include <thread>
 
 
 namespace naoqi
@@ -39,12 +40,22 @@ void SpeechSubscriber::reset(rclcpp::Node* node )
     10,
     std::bind(&SpeechSubscriber::speech_callback, this, std::placeholders::_1));
 
+  pub_speech_done_ = node->create_publisher<std_msgs::msg::Empty>("/speech_finished", 10);
+
   is_initialized_ = true;
 }
 
 void SpeechSubscriber::speech_callback( const std_msgs::msg::String::SharedPtr string_msg )
 {
-  p_tts_.async<void>("say", string_msg->data);
+  // Run say() in a detached thread so we don't block the ROS executor,
+  // then publish /speech_finished once NAO has actually finished speaking.
+  auto tts   = p_tts_;
+  auto pub   = pub_speech_done_;
+  auto text  = string_msg->data;
+  std::thread([tts, pub, text]() mutable {
+    tts.call<void>("say", text);
+    pub->publish(std_msgs::msg::Empty{});
+  }).detach();
 }
 
 } //publisher

@@ -29,6 +29,7 @@
  */
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "std_msgs/msg/empty.hpp"
 
 namespace naoqi
 {
@@ -50,6 +51,7 @@ private:
 
   qi::AnyObject p_tts_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_speech_;
+  rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr pub_speech_done_;
 
 
 
