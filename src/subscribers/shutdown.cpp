@@ -22,7 +22,13 @@ void ShutdownSubscriber::reset( rclcpp::Node* node )
 
 void ShutdownSubscriber::callback( const std_msgs::msg::Empty::SharedPtr msg )
 {
-  p_system_.async<void>("shutdown");
+  // Call shutdown synchronously so NAOqi accepts it before we drop the session.
+  // Then close the session explicitly — NAOqi won't proceed with system poweroff
+  // while active module connections are still open.
+  try {
+    p_system_.call<void>("shutdown");
+  } catch (...) {}
+  session_->close();
 }
 
 } // subscriber
