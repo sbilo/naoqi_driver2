@@ -41,6 +41,8 @@ void SpeechSubscriber::reset(rclcpp::Node* node )
     std::bind(&SpeechSubscriber::speech_callback, this, std::placeholders::_1));
 
   pub_speech_done_ = node->create_publisher<std_msgs::msg::Empty>("/speech_finished", 10);
+  // Clear any stale mute in the agent that may have survived a driver restart.
+  pub_speech_done_->publish(std_msgs::msg::Empty{});
 
   is_initialized_ = true;
 }
