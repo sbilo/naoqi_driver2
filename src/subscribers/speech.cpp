@@ -55,7 +55,9 @@ void SpeechSubscriber::speech_callback( const std_msgs::msg::String::SharedPtr s
   auto pub   = pub_speech_done_;
   auto text  = string_msg->data;
   std::thread([tts, pub, text]() mutable {
-    tts.call<void>("say", text);
+    try {
+      tts.call<void>("say", text);
+    } catch (...) {}
     pub->publish(std_msgs::msg::Empty{});
   }).detach();
 }
