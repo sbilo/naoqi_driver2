@@ -227,9 +227,12 @@ void AudioEventRegister::processRemote(int nbOfChannels, int samplesByChannel, q
   msg.data = std::vector<int16_t>(remoteBuffer, remoteBuffer + bufferSize);
 
   {
-    boost::mutex::scoped_lock lock(queue_mutex_);
-    // Drop if queue is getting backed up (keeps latency low)
-    if (publish_queue_.size() < 4)
+    // Use try-lock so this callback NEVER blocks NAOqi's reading thread.
+    // If the publish loop holds the lock, drop this frame immediately —
+    // a missed audio frame is far better than triggering "Reading thread
+    // is too slow" which eventually causes NAOqi to close the subscription.
+    boost::mutex::scoped_try_lock lock(queue_mutex_);
+    if (lock.owns_lock() && publish_queue_.size() < 4)
       publish_queue_.push(std::move(msg));
   }
   queue_cv_.notify_one();
