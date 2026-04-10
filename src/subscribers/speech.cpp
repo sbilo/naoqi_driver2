@@ -19,7 +19,6 @@
  * LOCAL includes
  */
 #include "speech.hpp"
-#include <thread>
 
 
 namespace naoqi
@@ -51,17 +50,14 @@ void SpeechSubscriber::reset(rclcpp::Node* node )
 
 void SpeechSubscriber::speech_callback( const std_msgs::msg::String::SharedPtr string_msg )
 {
-  // Run say() in a detached thread so we don't block the ROS executor,
-  // then publish /speech_finished once NAO has actually finished speaking.
-  auto tts   = p_tts_;
-  auto pub   = pub_speech_done_;
-  auto text  = string_msg->data;
-  std::thread([tts, pub, text]() mutable {
-    try {
-      tts.call<void>("say", text);
-    } catch (...) {}
-    pub->publish(std_msgs::msg::Empty{});
-  }).detach();
+  // Call say() async and attach a qi continuation that publishes /speech_finished
+  // when NAO finishes speaking.  Running inside the qi thread pool is safe for
+  // rclcpp publishers and avoids the detached-thread lifecycle issues.
+  auto pub = pub_speech_done_;
+  p_tts_.async<void>("say", string_msg->data)
+    .then([pub](qi::Future<void> /*f*/) mutable {
+      pub->publish(std_msgs::msg::Empty{});
+    });
 }
 
 } //publisher
