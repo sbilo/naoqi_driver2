@@ -50,6 +50,7 @@ private:
   std::string speech_topic_;
 
   qi::AnyObject p_tts_;
+  qi::Future<void> speak_future_;  // kept alive so the .then() continuation always fires
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_speech_;
   rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr pub_speech_done_;
 

@@ -54,7 +54,10 @@ void SpeechSubscriber::speech_callback( const std_msgs::msg::String::SharedPtr s
   // when NAO finishes speaking.  Running inside the qi thread pool is safe for
   // rclcpp publishers and avoids the detached-thread lifecycle issues.
   auto pub = pub_speech_done_;
-  p_tts_.async<void>("say", string_msg->data)
+  // Store the future so it stays alive until next call — if the qi::Future
+  // returned by .then() is discarded, qi may cancel the continuation before
+  // it fires, causing speech_finished to never be published.
+  speak_future_ = p_tts_.async<void>("say", string_msg->data)
     .then([pub](qi::Future<void> /*f*/) mutable {
       pub->publish(std_msgs::msg::Empty{});
     });
