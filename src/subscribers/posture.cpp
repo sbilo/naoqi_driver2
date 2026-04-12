@@ -25,9 +25,9 @@ void PostureSubscriber::callback( const std_msgs::msg::String::SharedPtr msg )
 {
   if (msg->data == "Crouch" || msg->data == "rest") {
     // ALMotion.rest() is more reliable than goToPosture in solitary life mode
-    p_motion_.async<void>("rest");
+    rest_future_ = p_motion_.async<void>("rest");
   } else {
-    p_posture_.async<bool>("goToPosture", msg->data, 0.5f);
+    posture_future_ = p_posture_.async<bool>("goToPosture", msg->data, 0.5f);
   }
 }
 

@@ -22,6 +22,8 @@ public:
 private:
   qi::AnyObject p_posture_;
   qi::AnyObject p_motion_;
+  qi::Future<bool> posture_future_;  // kept alive so async call reaches NAO
+  qi::Future<void> rest_future_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_;
 };
 
