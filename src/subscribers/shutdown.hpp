@@ -21,6 +21,7 @@ public:
 
 private:
   qi::AnyObject p_system_;
+  qi::SessionPtr session_;
   rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr sub_;
 };
 
