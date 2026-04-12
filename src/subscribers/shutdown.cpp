@@ -7,8 +7,7 @@ namespace subscriber
 
 ShutdownSubscriber::ShutdownSubscriber( const std::string& name, const std::string& topic, const qi::SessionPtr& session ):
   BaseSubscriber( name, topic, session ),
-  p_system_(session->service("ALSystem").value()),
-  session_(session)
+  p_system_(session->service("ALSystem").value())
 {}
 
 void ShutdownSubscriber::reset( rclcpp::Node* node )
@@ -23,15 +22,9 @@ void ShutdownSubscriber::reset( rclcpp::Node* node )
 
 void ShutdownSubscriber::callback( const std_msgs::msg::Empty::SharedPtr msg )
 {
-  // Tell NAO to power off, then close our qi session after a short delay.
-  // Closing the session releases NAOqi's active-client locks so the robot
-  // can complete its shutdown sequence without waiting for us to disconnect.
-  p_system_.async<void>("shutdown");
-  auto session = session_;
-  qi::async([session]() {
-    qi::os::msleep(2000);
-    session->close();
-  });
+  // Store the future so the async call is not cancelled before NAO processes it.
+  // (Discarding the qi::Future immediately can cause the RPC to be dropped.)
+  shutdown_future_ = p_system_.async<void>("shutdown");
 }
 
 } // subscriber

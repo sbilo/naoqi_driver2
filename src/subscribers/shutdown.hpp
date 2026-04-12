@@ -21,7 +21,7 @@ public:
 
 private:
   qi::AnyObject p_system_;
-  qi::SessionPtr session_;
+  qi::Future<void> shutdown_future_;  // kept alive so the async call reaches NAO
   rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr sub_;
 };
 
