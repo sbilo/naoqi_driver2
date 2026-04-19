@@ -19,6 +19,8 @@
  * LOCAL includes
  */
 #include "speech.hpp"
+#include <chrono>
+#include <thread>
 
 
 namespace naoqi
@@ -59,6 +61,14 @@ void SpeechSubscriber::speech_callback( const std_msgs::msg::String::SharedPtr s
   // it fires, causing speech_finished to never be published.
   speak_future_ = p_tts_.async<void>("say", string_msg->data)
     .then([pub](qi::Future<void> /*f*/) mutable {
+      // Publish three times with 100 ms gaps.  DDS BEST_EFFORT over Kubernetes
+      // pod networking can drop individual UDP packets; redundant publishes make
+      // reliable delivery much more likely without requiring RELIABLE QoS (which
+      // has discovery/multicast issues on most Kubernetes CNI plugins).
+      pub->publish(std_msgs::msg::Empty{});
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      pub->publish(std_msgs::msg::Empty{});
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
       pub->publish(std_msgs::msg::Empty{});
     });
 }
